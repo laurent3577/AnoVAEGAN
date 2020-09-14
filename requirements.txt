@@ -1,0 +1,4 @@
+yacs
+mnist
+visdom
+torch==1.6.0
