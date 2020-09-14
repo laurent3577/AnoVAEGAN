@@ -4,6 +4,7 @@ import os
 _C = CN()
 _C.OUTPUT_DIR = os.path.join(os.environ.get("HOME"), "Downloads")
 _C.EXP_NAME = ''
+_C.VISDOM = True
 ## Loss functions
 _C.LOSS = CN()
 _C.LOSS.REC_LOSS = 'L1'

@@ -61,7 +61,8 @@ def main():
     rec_loss_meter = ExpAvgMeter(0.98)
     prior_loss_meter = ExpAvgMeter(0.98)
     adv_loss_meter = ExpAvgMeter(0.98)
-    plotter = Plotter(log_to_filename=os.path.join(config.OUTPUT_DIR, "logs.viz"))
+    if config.VISDOM:
+        plotter = Plotter(log_to_filename=os.path.join(config.OUTPUT_DIR, "logs.viz"))
 
     step = 0
     for e in range(config.OPTIM.EPOCH):
@@ -95,7 +96,7 @@ def main():
 
             pbar.set_description('Train Epoch : {0}/{1} Loss : {2:.4f} '.format(e, config.OPTIM.EPOCH, loss_meter.value))
 
-            if step%config.PLOT_EVERY == 0:
+            if config.VISDOM and step%config.PLOT_EVERY == 0:
                 plotter.plot("Loss", step, loss_meter.value, "Loss", "Step", "Value")
                 plotter.plot("Loss", step, rec_loss_meter.value, "Rec loss", "Step", "Value")
                 plotter.plot("Loss", step, prior_loss_meter.value, "Prior loss", "Step", "Value")
