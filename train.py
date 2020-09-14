@@ -68,7 +68,7 @@ def main():
         pbar = tqdm(train_loader)
         for img in pbar:
             step += 1
-            img.to(device)
+            img = img.to(device)
             valid = torch.full((img.shape[0],1), 1, dtype=torch.float, device=device)
             fake = torch.full((img.shape[0],1), 0, dtype=torch.float, device=device)
             out = model(img)
