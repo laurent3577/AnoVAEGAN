@@ -63,8 +63,8 @@ def main():
         img.to(device)
         out = model(img)
         detection = (torch.abs(out['rec']-img)>args.detect_thresh).int()
-        img, detect_image = combine_detect_image(img, detection)
-        comp += [(i,d) for i,d in zip(img, detect_image)]
+        img, detect_image, rec = combine_detect_image(img, detection, out['rec'])
+        comp += [(i,d, r) for i,d, r in zip(img, detect_image, rec)]
 
     save_compare(args.save_size, comp[:args.n_plot], args.output_dir)
 

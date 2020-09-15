@@ -41,7 +41,7 @@ def main():
     discriminator.train()
     print(model)
     model_opt = build_opt(config, model)
-    disc_opt = build_opt(config, discriminator)
+    disc_opt = build_opt(config, discriminator, discriminator=True)
 
     dataset = MNISTDataset(
         split='train',
@@ -76,7 +76,9 @@ def main():
             rec_l = rec_loss(out['rec'], img)
             prior_l = prior_loss(out['mu'], out['logvar'])
             adv_l = adv_loss(discriminator(out['logits']), valid)
-            loss =  rec_l + prior_l + adv_l
+            loss =  config.LOSS.REC_LOSS_COEFF * rec_l \
+                    + config.LOSS.PRIOR_LOSS_COEFF * prior_l \
+                    + config.LOSS.ADV_LOSS_COEFF * adv_l
 
             model_opt.zero_grad()
             loss.backward()
