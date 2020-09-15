@@ -60,7 +60,7 @@ def main():
     pbar = tqdm(test_loader)
     comp = []
     for img in pbar:
-        img.to(device)
+        img = img.to(device)
         out = model(img)
         detection = (torch.abs(out['rec']-img)>args.detect_thresh).int()
         img, detect_image, rec = combine_detect_image(img, detection, out['rec'])
