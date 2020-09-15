@@ -11,7 +11,7 @@ OPTIM:
   DISC_LR: 0.00001
   EPOCH: 2
   SCHEDULER:
-    TYPE: 'Cosine'
+    TYPE: 'OneCycle'
     GAMMA: 10.
     COSINE_LR_MIN: 1e-6
     STEP_SIZE: 1

@@ -25,8 +25,8 @@ def save_compare(size, list_comps, output_dir, suffix):
         im0 = resize(ims[0].transpose(1,2,0), (size, size))
         im1 = resize(ims[1].transpose(1,2,0), (size, size))
         im2 = resize(ims[2].transpose(1,2,0), (size, size))
-        grid[(size+20)*ind:size*(ind+1)+ind*20, 10:size+10, :] = im0
-        grid[(size+20)*ind:size*(ind+1)+ind*20,size+40:2*size+40, :] = im1
+        grid[(size+20)*ind:size*(ind+1)+ind*20, :size, :] = im0
+        grid[(size+20)*ind:size*(ind+1)+ind*20,size+20:2*size+20, :] = im1
         grid[(size+20)*ind:size*(ind+1)+ind*20,2*size+40:, :] = im2
     grid *= 255
     pil_image = Image.fromarray(grid.astype(np.uint8))
