@@ -21,7 +21,7 @@ class EncoderDecoder(nn.Module):
         padw = 1
         self.role = role
         if role == "encoder":
-            sequence = [nn.Conv2d(in_channels, ndf, kernel_size=kw, stride=2, padding=padw), nn.ReLU()]
+            sequence = [nn.Conv2d(in_channels, ndf, kernel_size=kw, stride=2, padding=padw), norm_layer(ndf), nn.ReLU()]
             nf_mult = 1
             nf_mult_prev = 1
             for n in range(1, n_layers):  # gradually increase the number of filters
@@ -33,7 +33,7 @@ class EncoderDecoder(nn.Module):
                     nn.ReLU()
                 ]
         else:
-            sequence = [nn.ReLU(), nn.ConvTranspose2d(ndf, in_channels, kernel_size=kw, stride=2, padding=padw)]
+            sequence = [nn.ConvTranspose2d(ndf, in_channels, kernel_size=kw, stride=2, padding=padw)]
             nf_mult = 1
             nf_mult_prev = 1
             for n in range(1, n_layers):  # gradually increase the number of filters

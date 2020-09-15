@@ -3,11 +3,11 @@ from tqdm import tqdm
 import os
 import torch
 from torch.utils.data import DataLoader
-from optim import build_loss, build_opt
+from optim import build_loss, build_opt, rec_loss_map
 from model import AnoVAEGAN, Discriminator
 from config import config, update_config
 from data import MNISTDataset
-from utils import ExpAvgMeter, Plotter
+from utils import ExpAvgMeter, Plotter, save_batch_output
 
 
 def parse_args():
@@ -56,6 +56,7 @@ def main():
     rec_loss = build_loss(config.LOSS.REC_LOSS)
     prior_loss = build_loss(config.LOSS.PRIOR_LOSS)
     adv_loss = build_loss(config.LOSS.ADV_LOSS)
+    rec_key = rec_loss_map[config.LOSS.REC_LOSS]
 
     loss_meter = ExpAvgMeter(0.98)
     rec_loss_meter = ExpAvgMeter(0.98)
@@ -73,9 +74,9 @@ def main():
             valid = torch.full((img.shape[0],1), 1, dtype=torch.float, device=device)
             fake = torch.full((img.shape[0],1), 0, dtype=torch.float, device=device)
             out = model(img)
-            rec_l = rec_loss(out['rec'], img)
+            rec_l = rec_loss(out[rec_key], img)
             prior_l = prior_loss(out['mu'], out['logvar'])
-            adv_l = adv_loss(discriminator(out['logits']), valid)
+            adv_l = adv_loss(discriminator(out['rec']), valid)
             loss =  config.LOSS.REC_LOSS_COEFF * rec_l \
                     + config.LOSS.PRIOR_LOSS_COEFF * prior_l \
                     + config.LOSS.ADV_LOSS_COEFF * adv_l
@@ -85,7 +86,7 @@ def main():
             model_opt.step()
 
             real_loss = adv_loss(discriminator(img), valid)
-            fake_loss = adv_loss(discriminator(out['logits'].detach()), fake)
+            fake_loss = adv_loss(discriminator(out['rec'].detach()), fake)
             disc_loss = 0.5 * (real_loss + fake_loss)
 
             disc_opt.zero_grad()
@@ -103,6 +104,15 @@ def main():
                 plotter.plot("Loss", step, rec_loss_meter.value, "Rec loss", "Step", "Value")
                 plotter.plot("Loss", step, prior_loss_meter.value, "Prior loss", "Step", "Value")
                 plotter.plot("Loss", step, adv_loss_meter.value, "Adv loss", "Step", "Value")
+
+            if config.DEBUG.USE and step%config.DEBUG.DEBUG_EVERY == 0:
+                save_batch_output(
+                    img,
+                    out['rec'],
+                    config.DEBUG.DETECT_THRESH,
+                    config.DEBUG.SAVE_SIZE,
+                    config.OUTPUT_DIR,
+                    'batch_{}'.format(step))
         save_path = os.path.join(config.OUTPUT_DIR, config.EXP_NAME + "_checkpoint.pth")
         torch.save({
             'cfg':config,

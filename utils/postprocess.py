@@ -18,7 +18,7 @@ def combine_detect_image(img, detection, rec):
     out = out + detection
     return img.cpu().numpy(), out.cpu().numpy(), to_RGB(rec.detach()).cpu().numpy()
 
-def save_compare(size, list_comps, output_dir):
+def save_compare(size, list_comps, output_dir, suffix):
     l = len(list_comps)
     grid = np.ones((l*(size+20), 3*size+40 , 3))
     for ind, ims in enumerate(list_comps):
@@ -30,5 +30,11 @@ def save_compare(size, list_comps, output_dir):
         grid[(size+20)*ind:size*(ind+1)+ind*20,2*size+40:, :] = im2
     grid *= 255
     pil_image = Image.fromarray(grid.astype(np.uint8))
-    with open(os.path.join(output_dir, 'test_results.png'), mode='wb') as f:
+    with open(os.path.join(output_dir, suffix + '_output.png'), mode='wb') as f:
         pil_image.save(f, 'PNG')
+
+def save_batch_output(img, rec, thresh, save_size, output_dir, suffix):
+    detection = (torch.abs(rec-img)>thresh).int()
+    img, detect_image, rec = combine_detect_image(img, detection, rec)
+    comp = [(i,d, r) for i,d, r in zip(img, detect_image, rec)]
+    save_compare(save_size, comp, output_dir, suffix)

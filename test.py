@@ -1,10 +1,11 @@
 import argparse
 from model import AnoVAEGAN
 from data import MNISTDataset
-from utils import combine_detect_image, save_compare
+from utils import save_batch_output
 from torch.utils.data import DataLoader
 import torch
 from tqdm import tqdm
+import random
 
 
 def parse_args():
@@ -20,14 +21,14 @@ def parse_args():
                         type=str)
     parser.add_argument('--batch-size',
                         help="Batch size",
-                        default=32,
+                        default=16,
                         type=int)
     parser.add_argument('--detect-thresh',
                         help='Detection threshold',
-                        default=0.85,
+                        default=0.3,
                         type=float)
     parser.add_argument('--n-plot',
-                        help='Number of images to plot and save',
+                        help='Number of batches to plot and save',
                         default=12,
                         type=int)
     parser.add_argument('--save-size',
@@ -54,19 +55,15 @@ def main():
     dataset = MNISTDataset(
         split='test',
         input_size=config.DATASET.INPUT_SIZE)
-
+    random.shuffle(dataset.data)
+    dataset.data = dataset.data[:args.n_plot*args.batch_size]
     test_loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=False)
 
     pbar = tqdm(test_loader)
-    comp = []
-    for img in pbar:
+    for i, img in enumerate(pbar):
         img = img.to(device)
         out = model(img)
-        detection = (torch.abs(out['rec']-img)>args.detect_thresh).int()
-        img, detect_image, rec = combine_detect_image(img, detection, out['rec'])
-        comp += [(i,d, r) for i,d, r in zip(img, detect_image, rec)]
-
-    save_compare(args.save_size, comp[:args.n_plot], args.output_dir)
+        save_batch_output(img, out['rec'], args.detect_thresh, args.save_size, args.output_dir, 'test_batch_{}'.format(i))
 
 if __name__ == '__main__':
     main()

@@ -1,2 +1,2 @@
 from .logging import ExpAvgMeter, Plotter
-from .postprocess import combine_detect_image, save_compare
+from .postprocess import save_batch_output

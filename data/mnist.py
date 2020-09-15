@@ -42,7 +42,7 @@ class MNISTDataset(Dataset):
 			self.data = list(map(self._anomalize, self.data))
 		else:
 			raise ValueError("Only train or test splits supported, {} given".format(split))
-		self.transforms = build_transforms(transforms, input_size)
+		self.transforms = build_transforms(transforms, input_size, train=self.split=="train")
 
 	def __len__(self):
 		return len(self.data)
