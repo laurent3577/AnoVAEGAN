@@ -1,14 +1,22 @@
 DATASET:
-  INPUT_SIZE: (24,24)
+  INPUT_SIZE: (28,28)
+  DIR: '/Users/laurentdillard/Downloads'
 MODEL:
   N_LAYERS: 2
   IN_CHANNELS: 1
   N_FEATURES: 32
 OPTIM:
   BATCH_SIZE: 32
-  BASE_LR: 0.0005
-  DISC_LR: 0.00005
-EXP_NAME: 'mnist_test'
+  BASE_LR: 0.0001
+  DISC_LR: 0.00001
+  EPOCH: 2
+  SCHEDULER:
+    TYPE: 'Cosine'
+    GAMMA: 10.
+    COSINE_LR_MIN: 1e-6
+    STEP_SIZE: 1
+    CYCLE_DIV_FACTOR: 25
+EXP_NAME: 'mnist'
 LOSS:
   REC_LOSS: 'BCE'
   REC_LOSS_COEFF: 1.

@@ -15,6 +15,10 @@ def parse_args():
                         help='Saved model path',
                         required=True,
                         type=str)
+    parser.add_argument('--dataset-dir',
+                        help="Dataset directory",
+                        default='/tmp/',
+                        type=str)
     parser.add_argument('--output-dir',
                         help="Output directory",
                         default='/tmp/',
@@ -53,6 +57,7 @@ def main():
     model.eval()
 
     dataset = MNISTDataset(
+        data_dir=args.dataset_dir,
         split='test',
         input_size=config.DATASET.INPUT_SIZE)
     random.shuffle(dataset.data)

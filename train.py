@@ -40,10 +40,9 @@ def main():
     model.train()
     discriminator.train()
     print(model)
-    model_opt = build_opt(config, model)
-    disc_opt = build_opt(config, discriminator, discriminator=True)
 
     dataset = MNISTDataset(
+        data_dir=config.DATASET.DIR,
         split='train',
         input_size=config.DATASET.INPUT_SIZE,
         transforms=[
@@ -52,6 +51,9 @@ def main():
         ])
 
     train_loader =DataLoader(dataset, batch_size=config.OPTIM.BATCH_SIZE, shuffle=True)
+
+    model_opt, model_scheduler = build_opt(config, model, len(train_loader))
+    disc_opt, disc_scheduler = build_opt(config, discriminator, len(train_loader), discriminator=True)
 
     rec_loss = build_loss(config.LOSS.REC_LOSS)
     prior_loss = build_loss(config.LOSS.PRIOR_LOSS)
@@ -84,6 +86,8 @@ def main():
             model_opt.zero_grad()
             loss.backward()
             model_opt.step()
+            if model_scheduler.update_on_step:
+                model_scheduler.step()
 
             real_loss = adv_loss(discriminator(img), valid)
             fake_loss = adv_loss(discriminator(out['rec'].detach()), fake)
@@ -92,19 +96,25 @@ def main():
             disc_opt.zero_grad()
             disc_loss.backward()
             disc_opt.step()
+            if disc_scheduler.update_on_step:
+                disc_scheduler.step()
+
             loss_meter.update(float(loss.data))
             rec_loss_meter.update(float(rec_l.data))
             prior_loss_meter.update(float(prior_l.data))
             adv_loss_meter.update(float(adv_l.data))
 
-            pbar.set_description('Train Epoch : {0}/{1} Loss : {2:.4f} '.format(e, config.OPTIM.EPOCH, loss_meter.value))
+            pbar.set_description('Train Epoch : {0}/{1} Loss : {2:.4f} '.format(e+1, config.OPTIM.EPOCH, loss_meter.value))
 
             if config.VISDOM and step%config.PLOT_EVERY == 0:
                 plotter.plot("Loss", step, loss_meter.value, "Loss", "Step", "Value")
                 plotter.plot("Loss", step, rec_loss_meter.value, "Rec loss", "Step", "Value")
                 plotter.plot("Loss", step, prior_loss_meter.value, "Prior loss", "Step", "Value")
                 plotter.plot("Loss", step, adv_loss_meter.value, "Adv loss", "Step", "Value")
-
+                model_lr = model_opt.param_groups[0]['lr']
+                disc_lr = disc_opt.param_groups[0]['lr']
+                plotter.plot("LR", step, model_lr, "Model LR", "Step", "Value")
+                plotter.plot("LR", step, disc_lr, "Discr LR", "Step", "Value")
             if config.DEBUG.USE and step%config.DEBUG.DEBUG_EVERY == 0:
                 save_batch_output(
                     img,
@@ -113,6 +123,10 @@ def main():
                     config.DEBUG.SAVE_SIZE,
                     config.OUTPUT_DIR,
                     'batch_{}'.format(step))
+        if not model_scheduler.update_on_step:
+            model_scheduler.step()
+        if not disc_scheduler.update_on_step:
+            disc_scheduler.step()
         save_path = os.path.join(config.OUTPUT_DIR, config.EXP_NAME + "_checkpoint.pth")
         torch.save({
             'cfg':config,

@@ -8,7 +8,10 @@ transforms_map = {
 }
 
 def build_transforms(transforms_list, input_size, train):
-	img_transforms = [transforms.RandomResizedCrop(input_size)] if train else [transforms.Resize(input_size)]
+	if train:
+		img_transforms = [transforms.ToPILImage(), transforms.RandomResizedCrop(input_size)]
+	else:
+		img_transforms = [transforms.ToPILImage(), transforms.Resize(input_size)]
 	for (transf, transf_args) in transforms_list:
 		if transf_args is not None:
 			img_transforms.append(transforms_map[transf](**transf_args))
