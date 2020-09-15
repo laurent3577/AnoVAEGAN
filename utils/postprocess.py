@@ -16,7 +16,7 @@ def combine_detect_image(img, detection, rec):
     detection[:,1,:,:]= 0
     detection[:,2,:,:] = 0
     out = out + detection
-    return img.numpy(), out.numpy(), to_RGB(rec.detach()).numpy()
+    return img.cpu().numpy(), out.cpu().numpy(), to_RGB(rec.detach()).cpu().numpy()
 
 def save_compare(size, list_comps, output_dir):
     l = len(list_comps)
