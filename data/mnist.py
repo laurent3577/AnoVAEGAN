@@ -1,29 +1,19 @@
 import numpy as np 
 import torch
 from torchvision import datasets
-from cv2 import resize
-from PIL import Image
 from scipy.ndimage.interpolation import rotate
-from torch.utils.data import Dataset
-from .transforms import build_transforms
+from .dataset import BaseDataset
 
 
-class MNISTDataset(Dataset):
+class MNISTDataset(BaseDataset):
 	def __init__(self, data_dir, split, input_size, transforms=[]):
-		self.split = split
-		self.input_size = input_size
-		self.data = datasets.MNIST(data_dir, train=self.split=="train", download=True).data
-		if self.split=="test":
-			self.data = list(map(self._anomalize, self.data))
+		super(MNISTDataset, self).__init__(data_dir, split, input_size, transforms)
 
-		self.transforms = build_transforms(transforms, input_size, train=self.split=="train")
-
-	def __len__(self):
-		return len(self.data)
-
-	def __getitem__(self, index):
-		x = self.data[index]
-		return self.transforms(x)
+	def _get_data(self, data_dir, split):
+		data = datasets.MNIST(data_dir, download=True, train=self.split=="train").data
+		if self.split == "test":
+			data = list(map(self._anomalize, data))
+		return data
 
 	def _anomalize(self, img):
 		img = img.numpy()/255.
