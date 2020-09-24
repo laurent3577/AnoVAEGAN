@@ -15,7 +15,8 @@ class MNISTDataset(BaseDataset):
 			data = list(map(self._anomalize, data))
 		return data
 
-	def _anomalize(self, img):
+	@staticmethod
+	def _anomalize(img):
 		img = img.numpy()/255.
 		theta = np.random.randint(30,151)
 		rotation = rotate(img, theta, reshape=False)

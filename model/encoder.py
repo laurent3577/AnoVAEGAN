@@ -51,7 +51,8 @@ class EncoderDecoder(nn.Module):
             self.mean_head = self._build_head(ndf*nf_mult, norm_layer)
             self.logvar_head = self._build_head(ndf*nf_mult, norm_layer)
 
-    def _build_head(self, n_dim, norm_layer):
+    @staticmethod
+    def _build_head(n_dim, norm_layer):
         return nn.Sequential(
             nn.Conv2d(n_dim, n_dim, 1),
             norm_layer(n_dim),
