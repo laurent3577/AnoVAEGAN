@@ -46,7 +46,6 @@ def main():
         split='train',
         input_size=config.DATASET.INPUT_SIZE,
         transforms=[
-            ("Resize", {"size": config.DATASET.INPUT_SIZE}),
             ("HorizontalFlip", None),
             ("Rotation", {"degrees":30})
         ])

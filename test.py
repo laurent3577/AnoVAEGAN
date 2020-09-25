@@ -60,8 +60,7 @@ def main():
         data_dir=args.dataset_dir,
         split='test',
         input_size=config.DATASET.INPUT_SIZE,
-        transforms=[
-            ("Resize", {"size": config.DATASET.INPUT_SIZE})])
+        transforms=[])
     random.shuffle(dataset.data)
     dataset.data = dataset.data[:args.n_plot*args.batch_size]
     test_loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=False)
