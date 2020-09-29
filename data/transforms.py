@@ -9,7 +9,7 @@ transforms_map = {
 	"RandomResizedCrop": transforms.RandomResizedCrop
 }
 
-def build_transforms(transforms_list, input_size, train):
+def build_transforms(transforms_list):
 	img_transforms = [transforms.ToPILImage()]
 	for (transf, transf_args) in transforms_list:
 		if transf_args is not None:

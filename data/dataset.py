@@ -6,7 +6,7 @@ class BaseDataset(Dataset):
 		self.split = split
 		self.input_size = input_size
 		self.data = self._get_data(data_dir, self.split)
-		self.transforms = build_transforms(transforms, input_size, train=self.split=="train")
+		self.transforms = build_transforms(transforms)
 
 	def __len__(self):
 		return len(self.data)
